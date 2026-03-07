@@ -1,23 +1,19 @@
 # -------- Stage 1 : Builder --------
 FROM python:3.10-slim AS builder
 
-WORKDIR /app
+WORKDIR /build
 
-COPY requirements.txt .
+COPY dist/*.whl .
 
-RUN pip install --user -r requirements.txt
+RUN pip install --prefix=/install *.whl
 
 
-# -------- Stage 2 : Final Image --------
+# -------- Stage 2 : Runtime --------
 FROM python:3.10-slim
 
 WORKDIR /app
 
-COPY --from=builder /root/.local /root/.local
-
-COPY . .
-
-ENV PATH=/root/.local/bin:$PATH
+COPY --from=builder /install /usr/local
 
 EXPOSE 5000
 
