@@ -76,7 +76,7 @@ pipeline {
                 docker stop python-app || true
                 docker rm python-app || true
 
-                docker run -d -p 5000:5000 \
+                docker run -d -p 8084:3000 \
                 --name python-app \
                 $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG
                 '''
