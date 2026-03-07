@@ -17,11 +17,17 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                sh '''
-                python3 -m pip install --upgrade pip
-                pip3 install wheel setuptools
-                '''
-            }
+        sh '''
+        if ! command -v pip3 &> /dev/null
+        then
+            echo "Installing pip..."
+            sudo yum install python3-pip -y
+        fi
+
+        python3 -m pip install --upgrade pip
+        pip3 install wheel setuptools
+        '''
+    }
         }
 
         stage('Build Artifact') {
