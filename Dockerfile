@@ -15,6 +15,10 @@ WORKDIR /app
 
 COPY --from=builder /install /usr/local
 
+# Copy application files
+COPY app.py .
+COPY templates ./templates
+
 EXPOSE 5000
 
 CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
