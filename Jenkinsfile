@@ -74,6 +74,9 @@ pipeline {
         sh '''
         docker rm -f python-app || true
 
+        docker ps -q --filter "publish=5000" | xargs -r docker stop
+        docker ps -aq --filter "publish=5000" | xargs -r docker rm
+
         docker pull $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG
 
         docker run -d -p 5000:5000 \
