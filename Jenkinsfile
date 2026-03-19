@@ -5,7 +5,7 @@ pipeline {
         DOCKERHUB_USER = "sridatta5157"
         IMAGE_NAME = "python-devops-app"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        DOCKER_CREDS = "docker-hub-cred"
+        DOCKER_CREDS = "dock_CRED"
     }
 
     stages {
@@ -69,22 +69,36 @@ pipeline {
                 '''
             }
         }
-        stage('Deploy Container') {
+
+stage('Update K8s Image') {
     steps {
         sh '''
-        docker rm -f python-app || true
-
-        docker ps -q --filter "publish=5000" | xargs -r docker stop
-        docker ps -aq --filter "publish=5000" | xargs -r docker rm
-
-        docker pull $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG
-
-        docker run -d -p 5000:5000 \
-        --name python-app \
-        $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG
+        sed -i "s|image:.*|image: $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG|" k8s/deployment.yml
         '''
     }
 }
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f k8s/deployment.yml'
+                sh 'kubectl apply -f k8s/service.yml'
+            }
+        }
+        
+    //    stage('Deploy Container') {
+    // steps {
+    //    sh '''
+    //    docker rm -f python-app || true
 
-    }
+    //    docker ps -q --filter "publish=5000" | xargs -r docker stop
+    //    docker ps -aq --filter "publish=5000" | xargs -r docker rm
+
+    //    docker pull $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG
+
+     //   docker run -d -p 5000:5000 \
+     //   --name python-app \
+     //   $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG
+     //   '''
+   // }
+  //}
+}
 }
