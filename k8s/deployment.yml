@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userapp-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: userapp
+  template:
+    metadata:
+      labels:
+        app: userapp
+    spec:
+      containers:
+      - name: userapp
+        image: YOUR_DOCKERHUB_USERNAME/userapp:latest
+        ports:
+        - containerPort: 5000
