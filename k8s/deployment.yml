@@ -14,6 +14,7 @@ spec:
     spec:
       containers:
       - name: userapp
-        image: YOUR_DOCKERHUB_USERNAME/userapp:latest
+        image: IMAGE_PLACEHOLDER
+        // image: YOUR_DOCKERHUB_USERNAME/userapp:latest
         ports:
         - containerPort: 5000
