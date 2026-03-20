@@ -1,20 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: userapp-deploy
+  name: python-devops-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: userapp
+      app: python-devops-app
   template:
     metadata:
       labels:
-        app: userapp
+        app: python-devops-app
     spec:
       containers:
-      - name: userapp
-        image: IMAGE_PLACEHOLDER
-        // image: YOUR_DOCKERHUB_USERNAME/userapp:latest
+      - name: python-app
+        image: sridatta5157/python-devops-app:latest
         ports:
         - containerPort: 5000
