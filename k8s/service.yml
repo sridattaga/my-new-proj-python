@@ -1,11 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: userapp-service
+  name: python-devops-service
 spec:
   type: LoadBalancer
   selector:
-    app: userapp
+    app: python-devops-app
   ports:
-    - port: 80
+    - protocol: TCP
+      port: 80
       targetPort: 5000
