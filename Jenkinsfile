@@ -13,7 +13,6 @@ pipeline {
     }
 
     stages {
-
         stage('Clone Repo') {
             steps {
                 checkout scmGit(
