@@ -6,35 +6,42 @@ pipeline {
         IMAGE_NAME = "python-devops-app"
         IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKER_CREDS = "dock_CRED"
+
+        AWS_REGION = "ap-southeast-2"
+        EKS_CLUSTER = "pythoncluster"
+        KUBECONFIG = "/var/lib/jenkins/.kube/config"
     }
 
     stages {
 
         stage('Clone Repo') {
             steps {
-             checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'jenkinskey', url: 'https://github.com/sridattaga/my-new-proj-python.git']])
+                checkout scmGit(
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[
+                        credentialsId: 'jenkinskey',
+                        url: 'https://github.com/sridattaga/my-new-proj-python.git'
+                    ]]
+                )
             }
         }
+
         stage('Install Dependencies') {
             steps {
-        sh '''
-        if ! command -v pip3 &> /dev/null
-        then
-            echo "Installing pip..."
-            sudo yum install python3-pip -y
-        fi
+                sh '''
+                if ! command -v pip3 &> /dev/null; then
+                    sudo yum install python3-pip -y
+                fi
 
-        python3 -m pip install --upgrade pip
-        pip3 install wheel setuptools
-        '''
-    }
+                python3 -m pip install --upgrade pip
+                pip3 install wheel setuptools
+                '''
+            }
         }
 
         stage('Build Artifact') {
             steps {
-                sh '''
-                python3 setup.py bdist_wheel
-                '''
+                sh 'python3 setup.py bdist_wheel'
             }
         }
 
@@ -54,7 +61,11 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "$DOCKER_CREDS", usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: "$DOCKER_CREDS",
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
                     sh '''
                     echo $PASS | docker login -u $USER --password-stdin
                     '''
@@ -70,35 +81,40 @@ pipeline {
             }
         }
 
-stage('Update K8s Image') {
-    steps {
-        sh '''
-        sed -i "s|image:.*|image: $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG|" k8s/deployment.yml
-        '''
-    }
-}
-        stage('Deploy to Kubernetes') {
+        stage('Update K8s Image') {
             steps {
-                sh 'kubectl apply -f k8s/deployment.yml'
-                sh 'kubectl apply -f k8s/service.yml'
+                sh '''
+                sed -i "s|image:.*|image: $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG|" k8s/deployment.yml
+                '''
             }
         }
-        
-    //    stage('Deploy Container') {
-    // steps {
-    //    sh '''
-    //    docker rm -f python-app || true
 
-    //    docker ps -q --filter "publish=5000" | xargs -r docker stop
-    //    docker ps -aq --filter "publish=5000" | xargs -r docker rm
+        stage('Configure EKS Access') {
+            steps {
+                sh '''
+                aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER
+                kubectl config current-context
+                '''
+            }
+        }
 
-    //    docker pull $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl apply -f k8s/deployment.yml
+                kubectl apply -f k8s/service.yml
+                '''
+            }
+        }
 
-     //   docker run -d -p 5000:5000 \
-     //   --name python-app \
-     //   $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG
-     //   '''
-   // }
-  //}
-}
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                kubectl rollout status deployment python-devops-app || true
+                kubectl get pods -o wide
+                kubectl get svc
+                '''
+            }
+        }
+    }
 }
