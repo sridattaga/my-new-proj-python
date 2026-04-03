@@ -15,6 +15,8 @@ WORKDIR /app
 
 COPY --from=builder /install /usr/local
 
+RUN pip install --no-cache-dir prometheus_client
+
 # Copy application files
 COPY app.py .
 COPY templates ./templates
