@@ -1,0 +1,4 @@
+docker_image: "{{ lookup('env','DOCKER_USER') }}/python-app:latest"
+k8s_namespace: default
+deployment_file: ../k8s/deployment.yml
+service_file: ../k8s/service.yml
