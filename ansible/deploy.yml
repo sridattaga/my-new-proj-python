@@ -1,0 +1,25 @@
+- name: Deploy Python App to Kubernetes
+  hosts: local
+  vars_files:
+    - vars.yml
+
+  tasks:
+
+    - name: Update Docker image in deployment YAML
+      replace:
+        path: "{{ deployment_file }}"
+        regexp: 'image:.*'
+        replace: "image: {{ docker_image }}"
+
+    - name: Apply Kubernetes Deployment
+      command: kubectl apply -f {{ deployment_file }}
+
+    - name: Apply Kubernetes Service
+      command: kubectl apply -f {{ service_file }}
+
+    - name: Verify Deployment
+      command: kubectl get pods -n {{ k8s_namespace }}
+      register: pod_output
+
+    - debug:
+        var: pod_output.stdout
