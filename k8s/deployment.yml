@@ -12,9 +12,9 @@ spec:
       labels:
         app: python-devops-app
         annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "5000"
-        prometheus.io/path: "/metrics"
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "5000"
+          prometheus.io/path: "/metrics"
     spec:
       containers:
       - name: python-app
