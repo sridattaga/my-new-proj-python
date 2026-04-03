@@ -6,6 +6,7 @@ setup(
     py_modules=["app"],
     install_requires=[
         "Flask",
-        "gunicorn"
+        "gunicorn",
+        "prometheus_client"
     ],
 )
