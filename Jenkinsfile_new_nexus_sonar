@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         VENV = "${WORKSPACE}/venv"
-        NEXUS_URL = 'http://3.25.187.242:8081'
+        NEXUS_URL = 'http://3.107.159.126:8081'
         NEXUS_REPO = 'pypi-hosted'
         NEXUS_CREDENTIALS = 'nexus-creds'
         SONARQUBE_SERVER = 'sonar-server'
